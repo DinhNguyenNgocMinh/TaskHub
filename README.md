@@ -7,7 +7,7 @@
 | Hạng mục | Trạng thái |
 | --- | --- |
 | Giao diện terminal responsive | Hoàn thành |
-| Note lưu local trong `notes.json` | Hoàn thành |
+| Note web lưu tạm trong phiên trang | Hoàn thành |
 | Lọc note bằng `/noteshow` | Hoàn thành |
 | Xóa lịch sử terminal bằng `/clear` | Hoàn thành |
 | Chat room với Supabase Postgres | Hoàn thành |
@@ -33,11 +33,21 @@ File `.env` đã được cấu hình local và bị Git bỏ qua. Không commit
 
 | Command | Cách dùng | Kết quả |
 | --- | --- | --- |
-| `/note` | `/note mua dầu ăn` | Lưu note. Có thể thêm deadline sau dấu `_`. |
+| `/note` | `/note mua dầu ăn` | Lưu note tạm trong trang. Có thể thêm deadline sau dấu `_`. |
 | `/noteshow` | `/noteshow all` | Hiển thị note. Filter: `all`, `incomplete`, `complete`, `nodeadline`, `overdue`. |
 | `/clear` | `/clear` | Xóa phần lịch sử đang hiển thị trên terminal. |
 | `/msg` | `/msg dungdongvaianh hello` | Gửi tin nhắn tối đa 100 ký tự Unicode. |
 | `/room` | `/room dungdongvaianh` | Hiện tối đa 10 tin gần nhất, từ cũ đến mới, và nhận tin mới. |
+
+### Phím tắt bản web desktop
+
+| Phím | Tác dụng |
+| --- | --- |
+| `/` | Mở ô command và đặt con trỏ vào đó. |
+| `_` | Tách các phần của command; ví dụ `/msg_dungdongvaianh_hello`. Dấu cách vẫn dùng được. |
+| `Tab` | Chấp nhận command đang được gợi ý. |
+| `Enter` | Gửi/chạy command hiện có trong ô nhập. |
+| `Esc` | Đóng ô command; nếu đang mở room, kết nối Realtime của room cũng được hủy. |
 
 ### Chat room
 
@@ -46,6 +56,10 @@ File `.env` đã được cấu hình local và bị Git bỏ qua. Không commit
 - Không có tài khoản, nickname hay avatar. Tin luôn hiện dưới dạng `Anonymous: nội dung`.
 - Không hiện thời gian gửi trên UI, dù database có lưu `created_at`.
 - Khi đang mở `/room`, tin mới được nhận qua Realtime. Đóng terminal, dùng `/clear`, hoặc mở room khác sẽ hủy kết nối room cũ.
+
+### Vòng đời note web
+
+Note web chỉ nằm trong bộ nhớ tạm của trang hiện tại. Chúng hoạt động bình thường với `/note` và `/noteshow`, nhưng sẽ mất khi đóng tab/trình duyệt hoặc reload trang — bao gồm `Ctrl+Shift+R`. Chat room không mất vì message được lưu trong Supabase.
 
 ## Cấu hình Supabase hiện có
 
@@ -74,9 +88,9 @@ C:\TaskHub\
 ├── index.html              # Giao diện web
 ├── style.css               # Giao diện terminal
 ├── script.js               # Command, note và chat Realtime
-├── server.js               # Server local + API note + runtime chat config
+├── server.js               # Server local + runtime chat config
 ├── commands.json           # Command active/inactive
-├── notes.json              # Dữ liệu note web hiện có
+├── notes.json              # Dữ liệu note cũ, không được bản web V1 ghi thêm
 ├── .env                    # Cấu hình local, không commit
 ├── .env.example            # Mẫu biến môi trường
 ├── supabase\schema.sql     # Schema, seed, RLS và Realtime

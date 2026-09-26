@@ -28,6 +28,9 @@ let commandDefinitions = [
   { name: "clear", active: true },
 ];
 const noteShowFilters = ["all", "incomplete", "complete", "nodeadline", "overdue"];
+// Web notes intentionally live only for the current page session. A reload, hard reload,
+// or closing the tab discards this in-memory cache; chat remains in Supabase.
+let sessionNotes = [];
 const chatConfig = window.LIFE_TERMINAL_CHAT_CONFIG || {};
 const chatClient = createChatClient();
 const pendingChatMessages = new Set();
@@ -208,7 +211,7 @@ async function findEnabledRoom(roomName) {
 }
 
 function parseChatArguments(argumentsText) {
-  const match = argumentsText.trim().match(/^(\S+)(?:\s+([\s\S]*))?$/);
+  const match = argumentsText.trim().match(/^([^\s_]+)(?:[\s_]+([\s\S]*))?$/);
   return {
     roomName: match?.[1] || "",
     message: match?.[2]?.trim() || "",
@@ -374,16 +377,53 @@ async function saveNote(argumentsText) {
     return false;
   }
 
-  const response = await fetch("/api/notes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(note),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Could not save note.");
-
-  writeTerminalLine(`✓ Note #${data.note.id} saved.`);
+  const lastId = sessionNotes.reduce((highestId, savedNote) => {
+    return Math.max(highestId, Number(savedNote.id) || 0);
+  }, 0);
+  const savedNote = {
+    id: lastId + 1,
+    notes: note.notes,
+    category: null,
+    date_created: new Date().toISOString(),
+    date_deadline: note.date_deadline,
+    status: "incomplete",
+  };
+  sessionNotes.push(savedNote);
+  writeTerminalLine(`✓ Note #${savedNote.id} saved.`);
   return true;
+}
+
+function parseDeadline(value) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const text = value.trim();
+  let match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+
+  match = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+  return null;
+}
+
+function filterSessionNotes(filter) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  switch (filter) {
+    case "all":
+      return sessionNotes;
+    case "incomplete":
+    case "complete":
+      return sessionNotes.filter((note) => note.status === filter);
+    case "nodeadline":
+      return sessionNotes.filter((note) => !note.date_deadline);
+    case "overdue":
+      return sessionNotes.filter((note) => {
+        const deadline = parseDeadline(note.date_deadline);
+        return deadline && deadline < today && note.status !== "complete";
+      });
+    default:
+      return null;
+  }
 }
 
 function formatDeadline(deadline) {
@@ -399,14 +439,13 @@ function formatDeadline(deadline) {
 
 async function showNotes(argumentsText) {
   const filter = argumentsText.toLowerCase().split(/[\s_]/)[0] || "all";
-  const response = await fetch(`/api/notes?filter=${encodeURIComponent(filter)}`);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Could not load notes.");
+  const notes = filterSessionNotes(filter);
+  if (!notes) throw new Error("Invalid note filter.");
 
-  if (data.notes.length === 0) {
+  if (notes.length === 0) {
     writeTerminalLine("(no notes)");
   } else {
-    data.notes.forEach((note) => {
+    notes.forEach((note) => {
       writeTerminalLine(
         `${note.id}, ${note.notes}, ${formatDeadline(note.date_deadline)}, ${note.status}`,
         "terminal__csv-line",
@@ -467,6 +506,18 @@ commandButton.addEventListener("pointerdown", () => commandButton.classList.add(
 });
 
 document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "/"
+    && !isActive
+    && !event.ctrlKey
+    && !event.metaKey
+    && !event.altKey
+  ) {
+    event.preventDefault();
+    openTerminal();
+    return;
+  }
+
   if (event.key === "Escape" && isActive) {
     event.preventDefault();
     closeTerminal();
@@ -489,10 +540,10 @@ commandInput.addEventListener("keydown", (event) => {
     event.preventDefault();
     completeSuggestion();
   }
-  // Enter completes a command name only; the > button runs an active command.
+  // Tab accepts a suggestion; Enter runs the command currently in the input.
   if (event.key === "Enter") {
     event.preventDefault();
-    completeSuggestion();
+    void submitCommand();
   }
 });
 
