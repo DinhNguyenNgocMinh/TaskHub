@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A focused terminal-style command interface."
+    />
+    <title>Life Terminal</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a' stroke='%2300aa00'/%3E%3Cpath d='M11 9 19 16 11 23M21 23h-5' fill='none' stroke='%2300dd00' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="terminal-stage" aria-label="Life Terminal">
+      <section class="terminal" id="terminal" aria-live="polite">
+        <header class="terminal__header">
+          <p>$ LIFE TERMINAL v1.0.0</p>
+        </header>
+
+        <div class="terminal__content">
+          <p class="terminal__hint">Type /help for available commands</p>
+          <div class="terminal__scroll-area" id="terminal-scroll-area">
+            <div class="terminal__output" id="terminal-output" aria-live="polite"></div>
+
+            <!-- Hidden until command mode is active. -->
+            <label class="command-line" for="command-input">
+              <span class="command-line__prompt" aria-hidden="true">/</span>
+              <span class="command-line__field">
+                <!-- This ghost text mirrors the matching command suffix. -->
+                <span class="command-suggestion" id="command-suggestion" aria-hidden="true"></span>
+                <span class="command-render" id="command-render" aria-hidden="true"></span>
+                <input
+                  id="command-input"
+                  class="command-line__input"
+                  type="text"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  aria-label="Terminal command"
+                  aria-describedby="command-status"
+                />
+              </span>
+            </label>
+          </div>
+          <p class="sr-only" id="command-status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <div class="command-controls" id="command-controls">
+        <button
+          class="command-button"
+          id="command-button"
+          type="button"
+          aria-label="Open command input"
+          aria-controls="terminal"
+          aria-expanded="false"
+        >
+          <span aria-hidden="true">/</span>
+        </button>
+        <button class="separator-button" id="separator-button" type="button" aria-label="Insert command separator">
+          <span aria-hidden="true">_</span>
+        </button>
+        <button class="complete-button" id="complete-button" type="button" aria-label="Complete suggested command">
+          <span aria-hidden="true">→</span>
+        </button>
+        <button class="submit-button" id="submit-button" type="button" aria-label="Finish command">
+          <span aria-hidden="true">&gt;</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- The anon key is supplied at runtime by server.js; no key is committed here. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="chat-config.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

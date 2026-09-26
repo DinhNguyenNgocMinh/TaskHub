@@ -1,0 +1,129 @@
+{
+  "commands": [
+    {
+      "name": "note",
+      "prefix": "/note",
+      "description": "Add a new note",
+      "usage": "/note <information--required> <deadline--optional>",
+      "example": "/note mua dầu ăn",
+      "category": "notes",
+      "color": "#00ff00",
+      "active": true
+    },
+    {
+      "name": "noteshow",
+      "prefix": "/noteshow",
+      "description": "Show saved notes as CSV rows",
+      "usage": "/noteshow [all|incomplete|complete|nodeadline|overdue]",
+      "example": "/noteshow incomplete",
+      "category": "notes",
+      "color": "#00ff00",
+      "active": true
+    },
+    {
+      "name": "msg",
+      "prefix": "/msg",
+      "description": "Send an anonymous room message",
+      "usage": "/msg <room> <message>",
+      "example": "/msg dungdongvaianh hello",
+      "category": "messages",
+      "color": "#00ff00",
+      "active": true
+    },
+    {
+      "name": "room",
+      "prefix": "/room",
+      "description": "Open an anonymous room",
+      "usage": "/room <room>",
+      "example": "/room dungdongvaianh",
+      "category": "messages",
+      "color": "#00ff00",
+      "active": true
+    },
+    {
+      "name": "call",
+      "prefix": "/call",
+      "description": "Make a call",
+      "usage": "/call <contact>",
+      "example": "/call mom",
+      "category": "calls",
+      "color": "#00ff00",
+      "active": false
+    },
+    {
+      "name": "mail",
+      "prefix": "/mail",
+      "description": "Send email",
+      "usage": "/mail <recipient> <subject> <body>",
+      "example": "/mail boss important report attached",
+      "category": "emails",
+      "color": "#00ff00",
+      "active": false
+    },
+    {
+      "name": "reply",
+      "prefix": "/reply",
+      "description": "Quick reply",
+      "usage": "/reply <id> <message>",
+      "example": "/reply 1 thanks for the update",
+      "category": "replies",
+      "color": "#00ff00",
+      "active": false
+    },
+    {
+      "name": "list",
+      "prefix": "/list",
+      "description": "List items",
+      "usage": "/list <type> [count]",
+      "example": "/list notes recent 5",
+      "category": "general",
+      "color": "#00dd00",
+      "active": false
+    },
+    {
+      "name": "search",
+      "prefix": "/search",
+      "description": "Search across all",
+      "usage": "/search <keyword>",
+      "example": "/search dầu",
+      "category": "general",
+      "color": "#00dd00",
+      "active": false
+    },
+    {
+      "name": "help",
+      "prefix": "/help",
+      "description": "Show help",
+      "usage": "/help [command]",
+      "example": "/help note",
+      "category": "general",
+      "color": "#00dd00",
+      "active": false
+    },
+    {
+      "name": "clear",
+      "prefix": "/clear",
+      "description": "Clear terminal",
+      "usage": "/clear",
+      "example": "/clear",
+      "category": "general",
+      "color": "#00aa00",
+      "active": true
+    }
+  ],
+  "categories": {
+    "notes": "📝 Notes",
+    "messages": "💬 Messages",
+    "calls": "☎️ Calls",
+    "emails": "📧 Emails",
+    "replies": "⚡ Quick Reply",
+    "general": "🔧 General"
+  },
+  "settings": {
+    "app_name": "LIFE TERMINAL",
+    "version": "1.0.0",
+    "theme": "hacker-green",
+    "animation_duration": 200,
+    "language": "en"
+  }
+}
