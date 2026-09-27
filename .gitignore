@@ -1,0 +1,17 @@
+.env
+.env.*
+!**/.env.example
+
+# Superseded local Android working directory. The tracked Android source is /app.
+android_webview/
+
+# Android/local build output
+app/.gradle/
+app/build/
+app/app/build/
+app/local.properties
+
+# Common local/editor files
+*.log
+.DS_Store
+Thumbs.db

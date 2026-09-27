@@ -1,0 +1,481 @@
+:root {
+  --app-height: 100svh;
+  --stage-top: clamp(2.4rem, 6vh, 4.6rem);
+  --control-size: clamp(4rem, 6vw, 5rem);
+  --submit-size: clamp(4.9rem, 7.3vw, 6.1rem);
+  --control-gap: clamp(0.75rem, 2.5vh, 1.25rem);
+  --background: #0a0a0a;
+  --primary: #00dd00;
+  --border: #00aa00;
+  --accent: #00ff00;
+  --secondary: #00aa00;
+  --noteshow: #cadb38;
+  --attention: #a6c83d;
+  --error: #ff5c5c;
+  --motion-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--background);
+  color: var(--primary);
+  /* Roboto Mono/Noto Sans Mono retain Vietnamese diacritics while keeping the
+     fixed-width terminal appearance. Android WebView falls back safely. */
+  font-family: "Roboto Mono", "Noto Sans Mono", "Cascadia Mono", ui-monospace, monospace;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.terminal-stage {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: var(--app-height);
+  padding-top: var(--stage-top);
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+}
+
+.terminal {
+  display: flex;
+  flex-direction: column;
+  width: min(90%, 72rem);
+  height: clamp(12.3rem, 30vh, 16rem);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1.15rem;
+  transition:
+    height 200ms var(--motion-spring),
+    border-color 200ms ease-out,
+    box-shadow 200ms ease-out;
+}
+
+.terminal__header {
+  flex: 0 0 auto;
+  height: 2.35rem;
+  margin: 0 1rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid var(--border);
+}
+
+.terminal__header p,
+.terminal__hint {
+  margin: 0;
+  font-size: clamp(0.78rem, 2.8vw, 1rem);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.terminal__content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0.55rem 1rem 1rem;
+}
+
+.terminal__hint {
+  color: var(--primary);
+}
+
+.terminal__scroll-area {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  margin-top: 0.7rem;
+  padding: 0 0.3rem 1rem 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
+}
+
+.terminal__scroll-area::-webkit-scrollbar {
+  width: 0.35rem;
+  height: 0.35rem;
+}
+
+.terminal__scroll-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+.terminal__output {
+  min-height: 0;
+  color: var(--secondary);
+  font-size: clamp(0.78rem, 2.8vw, 1rem);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.terminal__output p {
+  margin: 0;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+
+.terminal__output .terminal__history-command {
+  color: var(--primary);
+}
+
+.terminal__output .terminal__csv-line {
+  color: var(--noteshow);
+}
+
+.terminal__output .terminal__error {
+  color: var(--error);
+}
+
+.terminal__output .terminal__note-code {
+  color: #00a843;
+}
+
+.command-line {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 1.6rem;
+  margin-top: 0.8rem;
+  opacity: 0;
+  transform: translateY(-0.35rem);
+  pointer-events: none;
+  touch-action: pan-y;
+  transition:
+    opacity 120ms ease-out 45ms,
+    transform 200ms var(--motion-spring) 20ms;
+}
+
+.command-line__prompt {
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+}
+
+.command-line__confirmation-label {
+  display: none;
+  flex: 0 0 auto;
+  color: var(--error);
+  font-size: clamp(0.68rem, 2.7vw, 0.82rem);
+  font-weight: 700;
+  line-height: 1.6rem;
+  white-space: nowrap;
+}
+
+.terminal.is-confirming-note-clear .command-line__prompt,
+.terminal.is-confirming-note-code .command-line__prompt,
+.terminal.is-confirming-note-drop .command-line__prompt {
+  display: none;
+}
+
+.terminal.is-confirming-note-clear .command-line__confirmation-label,
+.terminal.is-confirming-note-code .command-line__confirmation-label,
+.terminal.is-confirming-note-drop .command-line__confirmation-label {
+  display: inline;
+}
+
+.terminal.is-confirming-note-code .command-line__confirmation-label,
+.terminal.is-confirming-note-code .command-render {
+  color: var(--attention);
+}
+
+.terminal.is-confirming-note-code .command-line__input {
+  caret-color: var(--attention);
+}
+
+.command-line__field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.command-line__input {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--accent);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+}
+
+.command-suggestion {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  color: rgb(0 221 0 / 48%);
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.command-suggestion__typed {
+  color: transparent;
+}
+
+.command-render {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.command-token--argument {
+  color: var(--secondary);
+}
+
+.terminal.is-active {
+  /* Reserve equal space above and below the controls when the keyboard resizes
+     the viewport, so controls never cover the terminal. */
+  height: min(
+    72vh,
+    calc(
+      var(--app-height) - var(--stage-top) - var(--control-size) - var(--control-gap) - var(--control-gap)
+    )
+  );
+  border-color: var(--primary);
+  box-shadow: 0 0 0.75rem rgb(0 221 0 / 12%);
+}
+
+.terminal.is-active .command-line {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.command-controls {
+  position: absolute;
+  bottom: var(--control-gap);
+  left: 50%;
+  /* Four touch controls stay evenly distributed: X — _ — → — >. */
+  --control-step: clamp(4.5rem, 19.5vw, 6rem);
+  width: var(--control-size);
+  height: var(--control-size);
+  transform: translateX(-50%);
+}
+
+.command-button,
+.separator-button,
+.complete-button,
+.submit-button {
+  position: absolute;
+  display: grid;
+  width: var(--control-size);
+  height: var(--control-size);
+  padding: 0;
+  place-items: center;
+  color: var(--primary);
+  background: var(--background);
+  border: 2px solid var(--border);
+  border-radius: 1.1rem;
+  cursor: pointer;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    color 160ms ease-out,
+    background-color 160ms ease-out,
+    border-color 160ms ease-out,
+    box-shadow 160ms ease-out,
+    transform 110ms var(--motion-spring);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.command-button {
+  left: 0;
+}
+
+.command-controls.has-command .command-button {
+  transform: translateX(calc(-1.5 * var(--control-step)));
+}
+
+.separator-button,
+.complete-button,
+.submit-button {
+  left: 0;
+  color: var(--background);
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 1.1rem;
+  cursor: pointer;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(clamp(2.2rem, 4vw, 3rem)) scale(0.5);
+  transition:
+    opacity 70ms ease-out,
+    transform 110ms var(--motion-spring),
+    box-shadow 110ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.separator-button {
+  transform: translateX(calc(-0.5 * var(--control-step))) scale(0.5);
+  color: var(--primary);
+  background: #061006;
+  border-color: var(--border);
+}
+
+.complete-button {
+  transform: translateX(calc(0.5 * var(--control-step))) scale(0.5);
+}
+
+.submit-button {
+  width: var(--submit-size);
+  color: var(--primary);
+  background: var(--background);
+  border-color: var(--border);
+  transform: translateX(calc(1.5 * var(--control-step))) scale(0.5);
+}
+
+.command-controls.has-command .separator-button,
+.command-controls.has-command .complete-button,
+.command-controls.has-command .submit-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.command-controls.has-command .separator-button {
+  transform: translateX(calc(-0.5 * var(--control-step))) scale(1);
+}
+
+.command-controls.has-command .complete-button {
+  transform: translateX(calc(0.5 * var(--control-step))) scale(1);
+}
+
+.command-controls.has-command .submit-button {
+  transform: translateX(calc(1.5 * var(--control-step))) scale(1);
+}
+
+.command-button:hover,
+.command-button:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 1rem rgb(0 255 0 / 32%);
+  outline: none;
+  transform: scale(1.05);
+}
+
+.command-controls.has-command .command-button:hover,
+.command-controls.has-command .command-button:focus-visible {
+  transform: translateX(calc(-1.5 * var(--control-step))) scale(1.05);
+}
+
+.command-button:active,
+.command-button.is-holding {
+  color: var(--background);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0.6rem var(--accent), 0 0 1.7rem rgb(0 255 0 / 65%);
+  transform: scale(0.97);
+}
+
+.command-controls.has-command .command-button:active,
+.command-controls.has-command .command-button.is-holding {
+  transform: translateX(calc(-1.5 * var(--control-step))) scale(0.97);
+}
+
+.separator-button:hover,
+.separator-button:focus-visible,
+.complete-button:hover,
+.complete-button:focus-visible,
+.submit-button:hover,
+.submit-button:focus-visible {
+  box-shadow: 0 0 0.7rem var(--accent), 0 0 1.5rem rgb(0 255 0 / 48%);
+  outline: none;
+}
+
+.separator-button:active {
+  transform: translateX(calc(-0.5 * var(--control-step))) scale(0.94);
+}
+
+.complete-button:active {
+  transform: translateX(calc(0.5 * var(--control-step))) scale(0.94);
+}
+
+.submit-button:active {
+  transform: translateX(calc(1.5 * var(--control-step))) scale(0.94);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes terminal-pulse {
+  0% { box-shadow: 0 0 0 rgb(0 255 0 / 0%); }
+  55% { box-shadow: 0 0 1rem rgb(0 255 0 / 24%); }
+  100% { box-shadow: 0 0 0.75rem rgb(0 221 0 / 12%); }
+}
+
+.terminal.is-opening {
+  animation: terminal-pulse 200ms ease-out;
+}
+
+@media (max-width: 30rem) {
+  .terminal-stage {
+    padding-top: 2.35rem;
+  }
+
+  .terminal {
+    border-radius: 1rem;
+  }
+
+  .terminal__header,
+  .terminal__content {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .terminal__content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
