@@ -123,12 +123,12 @@
     {
       "name": "help",
       "prefix": "/help",
-      "description": "Show help",
-      "usage": "/help [command]",
-      "example": "/help note",
+      "description": "Show active commands",
+      "usage": "/help",
+      "example": "/help",
       "category": "general",
       "color": "#00dd00",
-      "active": false
+      "active": true
     },
     {
       "name": "clear",

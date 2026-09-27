@@ -29,7 +29,7 @@ let commandDefinitions = [
   { name: "reply", active: false },
   { name: "list", active: false },
   { name: "search", active: false },
-  { name: "help", active: false },
+  { name: "help", active: true },
   { name: "clear", active: true },
 ];
 const noteShowFilters = ["all", "incomplete", "complete", "nodeadline", "overdue"];
@@ -716,6 +716,27 @@ async function showNotes(argumentsText) {
   return true;
 }
 
+function showHelp() {
+  const activeCommands = [
+    ["/note", "Tạo ghi chú và đặt hạn"],
+    ["/noteshow", "Xem ghi chú theo trạng thái"],
+    ["/notedone", "Đánh dấu task đã hoàn thành"],
+    ["/notedrop", "Xóa một task đã chọn"],
+    ["/noteclear", "Xóa toàn bộ ghi chú đã lưu"],
+    ["/room", "Mở phòng chat thời gian thực"],
+    ["/msg", "Gửi tin nhắn vào phòng"],
+    ["/clear", "Xóa lịch sử terminal đang xem"],
+    ["/help", "Hiện các lệnh đang hoạt động"],
+  ];
+
+  writeTerminalLine("ACTIVE COMMANDS:", "terminal__history-command");
+  activeCommands.forEach(([command, description]) => {
+    writeTerminalLine(`${command} — ${description}`);
+  });
+  writeTerminalLine("Gõ lệnh; dùng _ để ngăn phần.");
+  writeTerminalLine("Nhấn › để chạy. Nhấn Esc để đóng.");
+}
+
 function prepareNextCommand() {
   commandInput.value = "";
   updateCommandUi();
@@ -821,6 +842,12 @@ async function submitCommand() {
       const note = parseNote(argumentsText);
       note.date_deadline = normalizeDeadline(note.date_deadline).value;
       startNoteCodeEntry(note);
+      return;
+    }
+    if (command.name === "help") {
+      showHelp();
+      commandInput.value = "";
+      updateCommandUi();
       return;
     }
     if (command.name === "noteshow") await showNotes(argumentsText);
