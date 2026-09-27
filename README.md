@@ -46,9 +46,7 @@ Trong **Environment Variables** của Render, thêm:
 | `SUPABASE_URL` | Supabase Dashboard → Project Settings → Data API → Project URL; dạng `https://<project-ref>.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Supabase Dashboard → Project Settings → API Keys → **Publishable key** (bắt đầu bằng `sb_publishable_`) |
 
-Không thêm `SUPABASE_SERVICE_ROLE_KEY` vào Render, web, APK hoặc GitHub. Anon/Publishable key là key được phép xuất hiện ở client; schema RLS trong `supabase/schema.sql` mới là lớp giới hạn quyền.
-
-Sau deploy, tại Supabase Dashboard → Authentication → URL Configuration, thêm URL Render (`https://<ten-service>.onrender.com`) vào **Site URL** và **Redirect URLs** nếu sau này dùng xác thực. Chat hiện tại không yêu cầu đăng nhập.
+Không thêm `SUPABASE_SERVICE_ROLE_KEY` vào Render, web, APK hoặc GitHub. Publishable key được phép xuất hiện ở client; schema RLS trong `supabase/schema.sql` mới là lớp giới hạn quyền.
 
 ## Android
 
@@ -70,6 +68,6 @@ APK ở `app\build\outputs\apk\release\app-release.apk`.
 
 ## Upload GitHub thủ công
 
-Upload các mục: `web`, `app`, `supabase`, `.gitignore`, `README.md`. Không upload `web/.env`, `app/local.properties`, các thư mục `build`, `.gradle`, hay thư mục `android_webview` cũ. File `.gitignore` đã chặn các mục này khi repository được GitHub xử lý.
+Upload các mục: `web`, `app`, `supabase`, `.gitignore`, `README.md`. Không upload `web/.env`, `app/local.properties`, các thư mục `build`, `.gradle`, hay thư mục `android_webview` cũ.
 
 Trước khi deploy lần đầu, chạy một lần `supabase/schema.sql` trong Supabase SQL Editor nếu database hiện tại chưa có bảng `rooms` và `messages`.
