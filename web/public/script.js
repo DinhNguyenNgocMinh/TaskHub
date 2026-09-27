@@ -34,6 +34,7 @@ let commandDefinitions = [
 ];
 const noteShowFilters = ["all", "incomplete", "complete", "nodeadline", "overdue"];
 const chatConfig = window.LIFE_TERMINAL_CHAT_CONFIG || {};
+const isAndroidApp = typeof window.AndroidChatConfig !== "undefined";
 const chatClient = createChatClient();
 const pendingChatMessages = new Set();
 let activeChatRoom = null;
@@ -899,6 +900,21 @@ commandButton.addEventListener("pointerdown", () => commandButton.classList.add(
 });
 
 document.addEventListener("keydown", (event) => {
+  // Desktop web users can open the terminal without reaching for the mouse.
+  // Android keeps its touch-first control so typing / never opens a duplicate input.
+  if (
+    event.key === "/"
+    && !isActive
+    && !isAndroidApp
+    && !event.ctrlKey
+    && !event.metaKey
+    && !event.altKey
+  ) {
+    event.preventDefault();
+    openTerminal();
+    return;
+  }
+
   if (event.key === "Escape" && isActive) {
     event.preventDefault();
     closeTerminal();

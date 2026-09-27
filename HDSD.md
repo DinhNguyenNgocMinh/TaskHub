@@ -2,13 +2,17 @@
 
 ## Bắt đầu
 
-Nhấn nút `/` để mở terminal.
+Web: nhấn phím `/` để mở terminal.
+
+App: nhấn nút `/` để mở terminal.
 
 Gõ lệnh rồi nhấn nút `›` để chạy.
 
-Nhấn `⇥` để nhận gợi ý lệnh.
+Web: nhấn `Tab` để nhận gợi ý lệnh.
 
-Nhấn `_` để chèn dấu phân cách.
+App: nhấn nút `⇥` để nhận gợi ý lệnh.
+
+Nhấn `_` để ngăn các phần của lệnh.
 
 ## Ghi chú
 
