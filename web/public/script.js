@@ -334,20 +334,20 @@ async function sendChatMessage(argumentsText) {
   const { roomName, message } = parseChatArguments(argumentsText);
   if (!roomName || !message) {
     writeTerminalLine("! Usage: /msg <room> <message>");
-    return;
+    return false;
   }
   if (Array.from(message).length > 100) {
     writeTerminalLine("! Message must be 100 characters or fewer.");
-    return;
+    return false;
   }
   try {
     const room = await findEnabledRoom(roomName);
     if (!room) {
       writeTerminalLine("! Room not found.");
-      return;
+      return false;
     }
     const pendingKey = `${room.id}\u0000${message}`;
-    if (pendingChatMessages.has(pendingKey)) return;
+    if (pendingChatMessages.has(pendingKey)) return false;
     pendingChatMessages.add(pendingKey);
     let data;
     let error;
@@ -363,8 +363,10 @@ async function sendChatMessage(argumentsText) {
     if (error) throw error;
     addChatMessage(data);
     writeTerminalLine("✓ Message sent.");
+    return true;
   } catch {
     writeTerminalLine("! Could not connect to chat. Try again.");
+    return false;
   }
 }
 
@@ -494,15 +496,19 @@ function startNoteClearConfirmation() {
 
 function confirmNoteClear() {
   const isConfirmed = commandInput.value === noteClearCode;
-  resetNoteClearConfirmation();
 
   if (isConfirmed) {
+    resetNoteClearConfirmation();
     const clearedCount = notes.length;
     notes = [];
     persistNotes();
     writeTerminalLine(`✓ NOTES PURGED: ${clearedCount} record(s) deleted.`);
   } else {
     writeTerminalLine("! ACCESS DENIED: confirmation code incorrect. Notes were not changed.", "terminal__error");
+    commandInput.value = "";
+    updateCommandUi();
+    commandInput.focus();
+    return;
   }
 
   prepareNextCommand();
@@ -528,21 +534,27 @@ function confirmNoteDrop() {
   const code = pendingNoteDropCode;
   const expectedConfirmation = `${noteDropConfirmationPrefix}${code}`;
   const isConfirmed = commandInput.value === expectedConfirmation;
-  resetNoteDropConfirmation();
-
   if (isConfirmed) {
     const noteIndex = notes.findIndex(
       (note) => String(note.code || "").toUpperCase() === code,
     );
     if (noteIndex >= 0) {
+      resetNoteDropConfirmation();
       notes.splice(noteIndex, 1);
       persistNotes();
       writeTerminalLine(`✓ TASK ${code} DROPPED: record deleted.`);
     } else {
+      resetNoteDropConfirmation();
       writeTerminalLine(`! TASK ${code} NOT FOUND: nothing was deleted.`, "terminal__error");
+      keepTerminalOpen();
+      return;
     }
   } else {
     writeTerminalLine("! DELETE ABORTED: confirmation code incorrect.", "terminal__error");
+    commandInput.value = "";
+    updateCommandUi();
+    commandInput.focus();
+    return;
   }
 
   prepareNextCommand();
@@ -560,9 +572,9 @@ function openTerminal() {
   window.setTimeout(() => terminal.classList.remove("is-opening"), 200);
 }
 
-function closeTerminal({ preserveContent = false } = {}) {
+function closeTerminal({ preserveContent = false, keepChatSubscription = false } = {}) {
   if (!isActive) return;
-  stopChatSubscription();
+  if (!keepChatSubscription) stopChatSubscription();
   isActive = false;
   resetNoteClearConfirmation();
   resetNoteCodeEntry();
@@ -738,10 +750,15 @@ function showHelp() {
   writeTerminalLine("Nhấn › để chạy. Nhấn Esc để đóng.");
 }
 
-function prepareNextCommand() {
+function prepareNextCommand({ keepChatSubscription = false } = {}) {
   commandInput.value = "";
   updateCommandUi();
-  closeTerminal({ preserveContent: true });
+  closeTerminal({ preserveContent: true, keepChatSubscription });
+}
+
+function keepTerminalOpen() {
+  updateCommandUi();
+  commandInput.focus();
 }
 
 function validationError(command, argumentsText) {
@@ -805,7 +822,7 @@ async function submitCommand() {
   if (error) {
     if (commandInput.value.trim()) writeCommandHistory(commandInput.value.trim());
     writeTerminalLine(`! ${error}`, "terminal__error");
-    prepareNextCommand();
+    keepTerminalOpen();
     return;
   }
   if (!isDataReady) {
@@ -833,6 +850,8 @@ async function submitCommand() {
       const note = notes.find((item) => String(item.code || "").toUpperCase() === code);
       if (!note) {
         writeTerminalLine(`! TASK ${code} NOT FOUND: nothing was deleted.`, "terminal__error");
+        keepTerminalOpen();
+        return;
       } else {
         startNoteDropConfirmation(code);
         return;
@@ -845,29 +864,32 @@ async function submitCommand() {
       startNoteCodeEntry(note);
       return;
     }
-    if (command.name === "help") {
-      showHelp();
-      commandInput.value = "";
-      updateCommandUi();
+    if (command.name === "help") showHelp();
+    if (command.name === "noteshow") await showNotes(argumentsText);
+    if (command.name === "msg" && !(await sendChatMessage(argumentsText))) {
+      keepTerminalOpen();
       return;
     }
-    if (command.name === "noteshow") await showNotes(argumentsText);
-    if (command.name === "msg") await sendChatMessage(argumentsText);
     if (command.name === "room") {
       const opened = await openChatRoom(argumentsText);
-      if (opened) {
-        commandInput.value = "";
-        updateCommandUi();
+      if (!opened) {
+        keepTerminalOpen();
         return;
       }
+      prepareNextCommand({ keepChatSubscription: true });
+      return;
     }
     if (command.name === "notedone") {
       const code = argumentsText.trim().toUpperCase();
       const note = notes.find((item) => String(item.code || "").toUpperCase() === code);
       if (!note) {
         writeTerminalLine(`! TASK ${code} NOT FOUND: no status was changed.`, "terminal__error");
+        keepTerminalOpen();
+        return;
       } else if (note.status === "done") {
         writeTerminalLine(`! TASK ${code} IS ALREADY DONE.`, "terminal__error");
+        keepTerminalOpen();
+        return;
       } else {
         note.status = "done";
         persistNotes();
@@ -878,7 +900,7 @@ async function submitCommand() {
     prepareNextCommand();
   } catch (error) {
     writeTerminalLine(`! ${error.message}`);
-    prepareNextCommand();
+    keepTerminalOpen();
   }
 }
 

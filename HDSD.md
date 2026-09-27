@@ -88,6 +88,10 @@ Lệnh này không xóa ghi chú.
 
 Nhấn `Esc` để đóng terminal.
 
+Lệnh chạy thành công sẽ tự đóng terminal.
+
+Khi có lỗi cần nhập lại, terminal vẫn mở.
+
 ## Lưu ý
 
 Ghi chú chỉ lưu trên thiết bị hiện tại.
